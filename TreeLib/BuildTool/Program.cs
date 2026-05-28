@@ -644,114 +644,129 @@ namespace BuildTool
 
         private static int MainInner(string[] args)
         {
-            Timing timing = new Timing();
-
-            while (args.Length != 0)
+            try
             {
-                const int NumArgs = 3;
+                Timing timing = new Timing();
 
-                if (args.Length < NumArgs)
+                while (args.Length != 0)
                 {
-                    throw new ArgumentException();
-                }
+                    const int NumArgs = 3;
 
-                string solutionBasePath = args[0];
-                string interfacesProjectBasePath = args[1];
-                string targetProjectName = args[2];
-
-                Array.Copy(args, NumArgs, args, 0, args.Length - NumArgs);
-                Array.Resize(ref args, args.Length - NumArgs);
-
-                string targetSolutionFilePath = FindFirstFile(solutionBasePath, ".sln");
-
-                string interfacesProjectName = Path.GetFileName(interfacesProjectBasePath);
-                string interfacesSolutionFilePath = FindFirstFile(Path.GetDirectoryName(interfacesProjectBasePath), ".sln");
-
-                string templateProjectBasePath = Path.Combine(solutionBasePath, "Template"); // TODO: hardcoded
-
-                string[] doNotUnload;
-                string[] imports;
-                Config[] configs = Config.LoadConfigs(Path.Combine(solutionBasePath, targetProjectName, "transform.xml"), out doNotUnload, out imports);
-
-
-
-                timing.Mark("Init/Load");
-
-                Solution interfacesSolution, targetSolution;
-                Project interfacesProject, targetProject;
-                {
-                    Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace workspace = Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.Create();
-
-                    // load interface project
-                    interfacesSolution = workspace.OpenSolutionAsync(interfacesSolutionFilePath).Result;
-                    interfacesProject = interfacesSolution.Projects.First(delegate (Project p) { return String.Equals(p.Name, interfacesProjectName); });
-
-                    // load target project
-                    targetSolution = workspace.OpenSolutionAsync(targetSolutionFilePath).Result;
-                    targetProject = targetSolution.Projects.First(delegate (Project p) { return String.Equals(p.Name, targetProjectName); });
-
-                    // remove all preexisting specializations since we'll be regenerating them and don't want multiply-defined errors
-                    foreach (DocumentId documentId in targetProject.DocumentIds)
+                    if (args.Length < NumArgs)
                     {
-                        if (Array.IndexOf(doNotUnload, targetProject.GetDocument(documentId).Name) < 0)
+                        throw new ArgumentException();
+                    }
+
+                    string solutionBasePath = args[0];
+                    string interfacesProjectBasePath = args[1];
+                    string targetProjectName = args[2];
+
+                    Array.Copy(args, NumArgs, args, 0, args.Length - NumArgs);
+                    Array.Resize(ref args, args.Length - NumArgs);
+
+                    string targetSolutionFilePath = FindFirstFile(solutionBasePath, ".sln");
+
+                    string interfacesProjectName = Path.GetFileName(interfacesProjectBasePath);
+                    string interfacesSolutionFilePath = FindFirstFile(Path.GetDirectoryName(interfacesProjectBasePath), ".sln");
+
+                    string templateProjectBasePath = Path.Combine(solutionBasePath, "Template"); // TODO: hardcoded
+
+                    string[] doNotUnload;
+                    string[] imports;
+                    Config[] configs = Config.LoadConfigs(Path.Combine(solutionBasePath, targetProjectName, "transform.xml"), out doNotUnload, out imports);
+
+
+
+                    timing.Mark("Init/Load");
+
+                    Solution interfacesSolution, targetSolution;
+                    Project interfacesProject, targetProject;
+                    {
+                        Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace workspace = Microsoft.CodeAnalysis.MSBuild.MSBuildWorkspace.Create();
+
+                        // load interface project
+                        interfacesSolution = workspace.OpenSolutionAsync(interfacesSolutionFilePath).Result;
+                        interfacesProject = interfacesSolution.Projects.First(delegate (Project p) { return String.Equals(p.Name, interfacesProjectName); });
+
+                        // load target project
+                        targetSolution = workspace.OpenSolutionAsync(targetSolutionFilePath).Result;
+                        targetProject = targetSolution.Projects.First(delegate (Project p) { return String.Equals(p.Name, targetProjectName); });
+
+                        // remove all preexisting specializations since we'll be regenerating them and don't want multiply-defined errors
+                        foreach (DocumentId documentId in targetProject.DocumentIds)
                         {
-                            targetProject = targetProject.RemoveDocument(documentId);
+                            if (Array.IndexOf(doNotUnload, targetProject.GetDocument(documentId).Name) < 0)
+                            {
+                                targetProject = targetProject.RemoveDocument(documentId);
+                            }
                         }
                     }
-                }
 
 
 
-                Compilation targetCompilation = null;
-                Compilation interfacesCompilation = null;
+                    Compilation targetCompilation = null;
+                    Compilation interfacesCompilation = null;
 
-                foreach (Config config in configs)
-                {
-                    string templateSourceFilePath = Path.Combine(templateProjectBasePath, Path.ChangeExtension(config.templateClassName, ".cs"));
-                    string targetFilePath = Path.Combine(solutionBasePath, targetProjectName, "Generated", Path.ChangeExtension(config.targetClassName, ".cs"));
-
-                    ConsoleColor oldColor = Console.ForegroundColor;
-                    Console.ForegroundColor = ConsoleColor.Yellow;
-                    Console.WriteLine(config.targetClassName);
-                    Console.ForegroundColor = oldColor;
-
-                    // lazy init
-                    if (targetCompilation == null)
+                    foreach (Config config in configs)
                     {
-                        Task<Compilation> targetCompiling = targetProject.GetCompilationAsync();
-                        Task<Compilation> interfacesCompiling = interfacesProject.GetCompilationAsync();
-                        Task.WaitAll(targetCompiling, interfacesCompiling);
-                        targetCompilation = targetCompiling.Result;
-                        interfacesCompilation = interfacesCompiling.Result;
+                        string templateSourceFilePath = Path.Combine(templateProjectBasePath, Path.ChangeExtension(config.templateClassName, ".cs"));
+                        string targetFilePath = Path.Combine(solutionBasePath, targetProjectName, "Generated", Path.ChangeExtension(config.targetClassName, ".cs"));
+
+                        ConsoleColor oldColor = Console.ForegroundColor;
+                        Console.ForegroundColor = ConsoleColor.Yellow;
+                        Console.WriteLine(config.targetClassName);
+                        Console.ForegroundColor = oldColor;
+
+                        // lazy init
+                        if (targetCompilation == null)
+                        {
+                            Task<Compilation> targetCompiling = targetProject.GetCompilationAsync();
+                            Task<Compilation> interfacesCompiling = interfacesProject.GetCompilationAsync();
+                            Task.WaitAll(targetCompiling, interfacesCompiling);
+                            targetCompilation = targetCompiling.Result;
+                            interfacesCompilation = interfacesCompiling.Result;
+                        }
+
+                        Generate(config, targetCompilation, templateSourceFilePath, targetFilePath, interfacesCompilation, timing);
                     }
 
-                    Generate(config, targetCompilation, templateSourceFilePath, targetFilePath, interfacesCompilation, timing);
+                    if (Debugger.IsAttached) // report after each command line argument group
+                    {
+                        timing.Finish();
+
+                        timing.WriteReport();
+                    }
                 }
 
-                if (Debugger.IsAttached) // report after each command line argument group
+                timing.Finish();
+
+                timing.WriteReport();
+
+
+
+                Console.WriteLine("Finished");
+                if (Debugger.IsAttached)
                 {
-                    timing.Finish();
-
-                    timing.WriteReport();
+                    Console.ReadLine();
                 }
+                return 0;
             }
-
-            timing.Finish();
-
-            timing.WriteReport();
-
-
-
-            Console.WriteLine("Finished");
-            if (Debugger.IsAttached)
+            catch (ReflectionTypeLoadException ex)
             {
-                Console.ReadLine();
+                foreach (var loaderEx in ex.LoaderExceptions)
+                {
+                    Console.WriteLine(loaderEx?.ToString());
+                }
+                throw;
             }
-            return 0;
+
+
         }
 
         public static int Main(string[] args)
         {
+            Microsoft.Build.Locator.MSBuildLocator.RegisterDefaults();
+
             if (Debugger.IsAttached)
             {
                 return MainInner(args);
