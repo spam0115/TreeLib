@@ -14,9 +14,6 @@
     <DocumentationFile>bin\Release\TreeLibInterface.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-  <ItemGroup>
     <Content Include="transform.xml" />
   </ItemGroup>
   <PropertyGroup />

@@ -14,9 +14,6 @@
     <DocumentationFile>bin\Release\TreeLibUtil.XML</DocumentationFile>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Microsoft.CSharp" />
-  </ItemGroup>
-  <ItemGroup>
     <ProjectReference Include="..\TreeLibInterface\TreeLibInterface.csproj" />
     <ProjectReference Include="..\TreeLibLong\TreeLibLong.csproj" />
     <ProjectReference Include="..\TreeLib\TreeLib.csproj" />
