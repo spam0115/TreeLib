@@ -26,6 +26,7 @@ using System.Diagnostics;
 
 using TreeLib;
 using TreeLib.Internal;
+using Range = TreeLib.Internal.Range;
 
 namespace TreeLibTest
 {

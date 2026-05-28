@@ -35,6 +35,8 @@ using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 using TreeLib.Internal;
+using Range = TreeLib.Internal.Range;
+
 
 #pragma warning disable CS1572 // silence warning: XML comment has a param tag for '...', but there is no parameter by that name
 #pragma warning disable CS1573 // silence warning: Parameter '...' has no matching param tag in the XML comment

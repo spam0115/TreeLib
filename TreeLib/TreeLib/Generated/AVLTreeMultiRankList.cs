@@ -27,6 +27,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+using Range = TreeLib.Internal.Range;
 
 using TreeLib.Internal;
 

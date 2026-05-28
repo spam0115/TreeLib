@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25123.0
+# Visual Studio Version 18
+VisualStudioVersion = 18.6.11819.183 stable
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TreeLib", "TreeLib\TreeLib.csproj", "{9F8074C9-ADE0-4CBD-B507-2698B6AE98F8}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -73,10 +73,8 @@ Global
 		{4B00CF37-A8F0-427B-9048-48AAE1C2AA4F}.Release|x86.Build.0 = Release|Any CPU
 		{6FBF254C-3F8C-49B9-8F09-0075D0044666}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{6FBF254C-3F8C-49B9-8F09-0075D0044666}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{6FBF254C-3F8C-49B9-8F09-0075D0044666}.Debug|x86.Build.0 = Debug|Any CPU
 		{6FBF254C-3F8C-49B9-8F09-0075D0044666}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{6FBF254C-3F8C-49B9-8F09-0075D0044666}.Release|x86.ActiveCfg = Release|Any CPU
-		{6FBF254C-3F8C-49B9-8F09-0075D0044666}.Release|x86.Build.0 = Release|Any CPU
 		{9F4651AA-C4C5-45C3-AD14-D30CA60E75D9}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{9F4651AA-C4C5-45C3-AD14-D30CA60E75D9}.Debug|Any CPU.Build.0 = Debug|x86
 		{9F4651AA-C4C5-45C3-AD14-D30CA60E75D9}.Debug|x86.ActiveCfg = Debug|x86
